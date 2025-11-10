@@ -338,10 +338,7 @@ write.csv(genecorslong,file="gene_program_expression_correlation.csv")
 
 
 
-library(dplyr)
-genecorslong %>%
-  group_by(groups) %>%                 # 单分组
-  summarise(mean_x = mean(cors, na.rm = TRUE))
+
 
 
 
