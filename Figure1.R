@@ -275,12 +275,7 @@ p=ggscatter(pertubation,
 
 ggsave(p,file="Module_UMAP.pdf",height = 3,width = 4.5)
 
-dat<-readRDS("/Volumes/zzzz/CAF_crispr/final_version/Fig5_1/dat_re_caculsted_num_rename_clusters_add_score0612.rds")
-dat@assays$RNA@layers$counts@matrix@matrix@dir="/Users/zm/Documents/project/crispr/CAF_test/data_QC_follwing_for_seurat"
-#dat@assays$RNA@layers ='/Users/zm/Documents/project/crispr/CAF_test/data_QC_follwing_for_seurat'
-dat@assays$RNA@layers$data@matrix@matrix@matrix@matrix@matrix@dir="/Users/zm/Documents/project/crispr/CAF_test/data_QC_follwing_for_seurat"
-dat@assays$RNA@layers$scale.data@matrix@matrix@matrix@matrix@matrix@matrix@matrix@matrix@dir="/Users/zm/Documents/project/crispr/CAF_test/data_QC_follwing_for_seurat"
-dat$cellnewname=colnames(dat)
+dat<-readRDS("CAFs.rds")
 
 
 controlcell<-subset(dat,Pertubation=="Control")
