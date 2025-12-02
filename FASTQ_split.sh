@@ -2,11 +2,11 @@
 
 #!/bin/bash
 
-inputdir=/exdisk/zhangmin/8_Crispr/data/CAF/RS240531_0619/mRNA
+inputdir=/mRNA
 # out fastq file output
-outputFastq=/exdisk/zhangmin/8_Crispr/data/fastqSplit/CAF/RS240531_0619/mRNA
+outputFastq=RS240531_0619/mRNA
 
-BarcodeFile=/exdisk/zhangmin/8_Crispr/data/CAF/RS240531_0619/mRNA/mRNA_index_barcode.txt
+BarcodeFile==mRNA_index_barcode.txt
 
 
 
