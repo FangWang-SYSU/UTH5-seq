@@ -3,7 +3,6 @@ library(Seurat)
 library(ggpubr)
 library(Nebulosa)
 
-
 ntcs<-readRDS("fibroblast.rds")
 
 umapColor1=c("#7F3C8D","#11A579","#3969AC","#E73F74","#80BA5A",
