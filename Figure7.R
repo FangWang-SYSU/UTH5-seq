@@ -38,7 +38,7 @@ ggsave(pp,file=paste0(pt,"_scdat_mRNA.pdf"))
 
 }
 
-# Fig6b
+
 synergyScore=read.csv("synergy_score.csv",header = T,check.names = F)
 synergyScore$clusters=factor(synergyScore$clusters,levels = paste0("S",0:12))
 p<-synergyScore%>%ggplot(aes(clusters,synergyScore))+
@@ -54,7 +54,7 @@ p<-synergyScore%>%ggplot(aes(clusters,synergyScore))+
 ggsave(p,file="synergy_score.pdf")
 
 
-## Fig6c
+
 seu=readRDS("synergy_score.rds")
 genes<-c("IGFBP5","COL8A1","USP53","CHSY3",
          "CITED2","CTSB","PRR16","SOX5",
@@ -91,7 +91,7 @@ ggsave(p,file="shared_synergy_genes.pdf")
 
 
 
-## Fig6d
+
 genes<-c("GPR176","KCNQ1OT1","TBC1D19","C5orf30",
          "LIMCH1","CALM2","MYH9","MSN","OXR1",
          "HEG1","EIF4A2","SDC2","SKA2","ENO1")
@@ -127,7 +127,7 @@ p
 ggsave(p,file="Specific_synergy_genes.pdf")
 
 
-## Fig6e
+
 plotdat<-read.table("GO_BP_top10.txt",header = T,sep="\t",check.names = F)
 plotdat$Description=factor(plotdat$Description,levels = unique(plotdat$Description))
 pp=ggscatter(plotdat,
@@ -141,7 +141,7 @@ pp=ggscatter(plotdat,
                         range = c(4, 6))+rotate_x_text(45)
 ggsave(pp,file="GO_BP_top10.pdf")
 
-## fig6f
+
 library(fmsb)
 df<-read.csv("synergy_genes_all_enrich_pathway_ra_kegg.csv",header = T,check.names = F,row.names = 1)
 pdf("Eneichment_KEGG_Reactome.pdf",width =8, height =8)
