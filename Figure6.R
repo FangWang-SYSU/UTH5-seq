@@ -5,7 +5,6 @@ library(parallel)
 library(dplyr)
 library(ggpubr)
 library(fmsb)
-
 seu<-readRDS("firbo.rds")
 modules<-paste0("Module",1:8)
 for(ms in modules){
