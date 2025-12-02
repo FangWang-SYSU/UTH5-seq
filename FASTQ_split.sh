@@ -6,7 +6,7 @@ inputdir=/mRNA
 # out fastq file output
 outputFastq=RS240531_0619/mRNA
 
-BarcodeFile==mRNA_index_barcode.txt
+BarcodeFile=mRNA_index_barcode.txt
 
 
 
