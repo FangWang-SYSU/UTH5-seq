@@ -100,7 +100,7 @@ p=ggscatter(enrichDat,
   rotate_x_text(45)
 ggsave(p,file="Fig5d")
 
-## fig5e
+
 plotdat<-read.csv("MFGE8_compare_up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 
 pdf("Fig5e.pdf",width =8, height =8)
@@ -131,7 +131,7 @@ legend(x = "bottomright",
 
 dev.off()
 
-## Fig5f
+
 plotdat<-read.csv("MFGE8_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5f.pdf",width =8, height =8)
 radarchart(plotdat,
@@ -161,8 +161,6 @@ legend(x = "bottomright",
 
 dev.off()
 
-
-## Fig5g
 plotdat<-read.csv("EPB41L1_compare_Up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5g.pdf",width =8, height =8)
 radarchart(plotdat,
@@ -192,8 +190,6 @@ legend(x = "bottomright",
 
 dev.off()
 
-
-## Fig5h
 plotdat<-read.csv("EPB41L1_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5h.pdf",width =8, height =8)
 radarchart(plotdat,
@@ -223,7 +219,7 @@ legend(x = "bottomright",
 
 dev.off()
 
-## Fig5i
+
 plotdat<-read.csv("GPR1_compare_Up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5i.pdf",width =8, height =8)
 radarchart(plotdat,
@@ -256,7 +252,7 @@ dev.off()
 
 
 
-## Fig5j
+
 plotdat<-read.csv("GPR1_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5j.pdf",width =8, height =8)
 radarchart(plotdat,
