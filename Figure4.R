@@ -134,7 +134,7 @@ pheatmap::pheatmap(tfc_6_7_postn_ko,
 
 
 
-## Fig 2c
+
 glis1_mecom_NTC<-read.csv("GLIS1_MECOM_NTC.csv",
                           header = T,
                           row.names = 1,
@@ -174,7 +174,7 @@ ggsave(p,file="Fig2c.pdf")
 
 
 
-## Fig 2d
+
 znf117_mecom_NTC<-read.csv("ZNF117_MECOM_NTC.csv",
                           header = T,
                           row.names = 1,
@@ -214,7 +214,7 @@ ggsave(p,file="Fig2d.pdf")
 
 
 
-## Fig 2e
+
 
 mybl1_nr2c2_NTC<-read.csv("MYBL1_NR2C2_NTC.csv",
                            header = T,
@@ -253,7 +253,7 @@ p2<-ggscatter(mybl1_nr2c2_KO,
 p=p1+p2
 ggsave(p,file="Fig2e.pdf")
 
-## Fig 2f
+
 mybl2_nr2c2_NTC<-read.csv("MYBL2_NR2C2_NTC.csv",
                           header = T,
                           row.names = 1,
@@ -292,7 +292,7 @@ p=p1+p2
 ggsave(p,file="Fig2f.pdf")
 
 
-## Fig 2g
+
 e2f7_mecom_NTC<-read.csv("E2F7_MECOM_NTC.csv",
                           header = T,
                           row.names = 1,
