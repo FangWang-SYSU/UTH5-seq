@@ -9,8 +9,6 @@ library(anndata)
 library(SeuratDisk) 
 library(reticulate)
 
-
-
 seu=readRDS("fibro.rds")
 
 ## Response clusters
