@@ -19,6 +19,58 @@ cols=c("#084594","#2c4ca0", "#4292c6",
        "white", "white","#fee0d2","#fcbba1"
        ,"#fc9272","#ef3b2c", "#cb181d","#99000d")
 
+## Figure 4a
+fig4a <- read_source("Figure4a_source_data.csv")
+plotdat <- data.frame(gene_score = fig4a$CytoTRACE2_Score, groups = fig4a$Condition)
+plotdat <- plotdat %>% mutate(group = forcats::fct_reorder(groups, gene_score, .fun = 'median', .desc = FALSE))
+p <- ggviolin(plotdat,
+              x = "group",
+              y = "gene_score",
+              color = 'group',
+              fill = "group",
+              legend = "right",
+              outlier = FALSE,
+              add = "boxplot",
+              palette = c("#eb7e60", "grey"),
+              add.params = list(fill = "white", outlier.shape = NA),
+              error.plot = "errorbar", border = "white") + stat_compare_means()
+ggsave(p, file = file.path(output_dir, "Figure4a_cytotrace_score.pdf"))
+
+## Figure 4b
+fig4b <- read_source("Figure4b_source_data.csv")
+plotdat <- data.frame(gene_score = fig4b$proliferation, groups = fig4b$Condition)
+plotdat <- plotdat %>% mutate(group = forcats::fct_reorder(groups, gene_score, .fun = 'median', .desc = FALSE))
+p <- ggviolin(plotdat,
+              x = "group",
+              y = "gene_score",
+              color = 'group',
+              fill = "group",
+              legend = "right",
+              outlier = FALSE,
+              add = "boxplot",
+              palette = c("#eb7e60", "grey"),
+              add.params = list(fill = "white", outlier.shape = NA),
+              error.plot = "errorbar", border = "white") + stat_compare_means()
+ggsave(p, file = file.path(output_dir, "Figure4b_proliferation_score.pdf"))
+
+## Figure 4c
+fig4c <- read_source("Figure4c_source_data.csv")
+plotdat <- data.frame(gene_score = fig4c$matrix_remodling1, groups = fig4c$Condition)
+plotdat <- plotdat %>% mutate(group = forcats::fct_reorder(groups, gene_score, .fun = 'median', .desc = FALSE))
+p <- ggviolin(plotdat,
+              x = "group",
+              y = "gene_score",
+              color = 'group',
+              fill = "group",
+              legend = "right",
+              outlier = FALSE,
+              add = "boxplot",
+              palette = c("#eb7e60", "grey"),
+              add.params = list(fill = "white", outlier.shape = NA),
+              error.plot = "errorbar", border = "white") + stat_compare_means()
+ggsave(p, file = file.path(output_dir, "Figure4c_matrix_remodling_score.pdf"))
+
+
 postn_tf_cors<-read.csv("TF_correlation_POSTN_KO.csv",
                         header = T,
                         row.names = 1,
