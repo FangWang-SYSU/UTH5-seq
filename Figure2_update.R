@@ -7,7 +7,7 @@ library(dplyr)
 
 ht_opt$message <- FALSE
 
-source_data_dir <- if (dir.exists("../Figure_dat_for_public/Figure2")) {
+source_data_dir <- if (dir.exists("../Figure2")) {
   "../Figure_dat_for_public/Figure2"
 } else if (dir.exists("Figure2")) {
   "Figure2"
