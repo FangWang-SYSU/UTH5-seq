@@ -3,42 +3,50 @@ library(Seurat)
 library(ggpubr)
 library(Nebulosa)
 
-ntcs<-readRDS("fibroblast.rds")
+replot_data <- read.csv("Figure5a_source_data.csv", check.names = FALSE)
+cluster_values <- unique(replot_data[["Seurat cluster"]])
+cluster_numbers <- suppressWarnings(as.numeric(cluster_values))
+if (all(!is.na(cluster_numbers))) {
+  cluster_levels <- as.character(sort(cluster_numbers))
+} else {
+  cluster_levels <- sort(as.character(cluster_values))
+}
+replot_data[["Seurat cluster"]] <- factor(
+  replot_data[["Seurat cluster"]],
+  levels = cluster_levels
+)
 
-umapColor1=c("#7F3C8D","#11A579","#3969AC","#E73F74","#80BA5A",
-             "#E68310", "#008695","#CF1C90", "#f97b72", "#E7ABFD"
-             ,"#9a221c" ,"#FED8A3" ,"#fcb93e")
+figure5a_plot <- ggplot(
+  replot_data,
+  aes(x = `UMAP 1`, y = `UMAP 2`, color = `Seurat cluster`)
+) +
+  geom_point(size = 0.25, stroke = 0, alpha = 1) +
+  coord_equal() +
+  labs(x = "UMAP 1", y = "UMAP 2", color = "Seurat cluster") +
+  theme_classic(base_size = 10) +
+  theme(
+    legend.key.height = unit(0.35, "cm"),
+    legend.key.width = unit(0.35, "cm"),
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    axis.title = element_text(size = 9),
+    axis.text = element_text(size = 8)
+  )
 
-p1=DimPlot(ntcs,
-           group.by = "seurat_clusters",
-           cols = umapColor1,
-           alpha=0.8,
-           pt.size = 0.4)
-ggsave(p1,file="NTC_umap.pdf")
-
-
-plotdat<-data.frame(cytotrace_score=ntcs$CytoTRACE2_Score,
-                    groups=ntcs$cellstates)
+ggsave(
+  plot_file,
+  figure5a_plot,
+  width = 4.2,
+  height = 3.8,
+  units = "in",
+  useDingbats = FALSE
+)
 
 
 
-plotdat<- plotdat %>% mutate(group=forcats::fct_reorder(groups,cytotrace_score, .fun = 'median',.desc = T) )
-
-p=ggviolin(plotdat,
-           x = "group",
-           y = "cytotrace_score",
-           color='group', fill = "group",
-           legend="right",
-           add = "boxplot",
-           palette = umapColor1,
-           add.params = list(fill = "white"),
-           error.plot = "errorbar",border="white")
-p
-
-ggsave("cluster_cytotrace_score.pdf",p,)
 
 ## marker gene expression
-sc_dat.markers<-read.csv("/Volumes/zz_20t/Project/CRISPR_CAF/For_public/Ref/Fig2/marker_gene_functions_df_unique.csv",header = T,row.names = 1,check.names = F)
+sc_dat.markers<-read.csv("Figure5b_scouce_data.csv",header = T,row.names = 1,check.names = F)
 
 #write.csv(df_unique,file="df_unique_merge5611.csv")
 
@@ -87,18 +95,41 @@ draw(ht,
      legend_grouping = "original")
 dev.off() 
 
-### PRRX1 and ACTA2 density
-p <- plot_density(controlcell, 
-                  c("PRRX1","ACTA2"),
-                  slot = "data",
-                  adjust = 0.01,
-                  pal = "plasma",
-                  size = 0.1)
 
-ggsave(p,file="PRRX1_ACTA2_density_umap.pdf")
+
+plotdat<-read.csv("Figure5c_source_data.csv", check.names = FALSE)
+plotdat<- plotdat %>% mutate(group=forcats::fct_reorder(groups,cytotrace_score, .fun = 'median',.desc = T) )
+
+p=ggviolin(plotdat,
+           x = "group",
+           y = "cytotrace_score",
+           color='group', fill = "group",
+           legend="right",
+           add = "boxplot",
+           palette = umapColor1,
+           add.params = list(fill = "white"),
+           error.plot = "errorbar",border="white")
+p
+
+ggsave(p,file="cluster_cytotrace_score.pdf")
+
+
+igure5d_source_data <- read.csv("Figure5d_source_data.csv", header = TRUE, check.names = FALSE)
+p1 <- ggplot(Figure5d_source_data, aes(`UMAP 1`, `UMAP 2`, color = `PRRX1 density`)) +
+  geom_point(size = 0.1) +
+  scale_color_viridis_c(option = "plasma", name = "Density") +
+  ggtitle("PRRX1") +
+  theme_void()
+p2 <- ggplot(Figure5d_source_data, aes(`UMAP 1`, `UMAP 2`, color = `ACTA2 density`)) +
+  geom_point(size = 0.1) +
+  scale_color_viridis_c(option = "plasma", name = "Density") +
+  ggtitle("ACTA2") +
+  theme_void()
+p <- p1 + p2
+ggsave(p,file="Figure5d_figuree.pdf")
 
 ## marker genes bubble plot
-featureplot<-read.csv("feature_marker_plot_buble.csv",header = T,row.names = 1,check.names = F)
+featureplot<-read.csv("Figure5f_source_data.csv",header = T,row.names = 1,check.names = F)
 featureplot$anno=factor(featureplot$anno,levels = c(unique(featureplot$anno)))
 
 featureplot$features.plot=factor(featureplot$features.plot,
@@ -123,10 +154,46 @@ pp=ggscatter(featureplot,
   oob     = squish   
 )
 pp
-ggsave(pp,file="feature_marker_plot_buble1111.pdf")
+ggsave(pp,file="feature_marker_plot_buble.pdf")
 
+prop<-read.csv("Figure5k.csv",header=T)
+p=ggplot(prop, aes( x = Group,y=Proportion,fill = clusters, stratum = clusters, 
+                          alluvium = clusters))+ geom_col(width = 0.5,  color = 'white', size = 0.5) + 
+  geom_flow(width = 0.5, alpha = 0.3, knot.pos = 0.2, color = 'white', size = 0.5)+ 
+  coord_flip()+ 
+  scale_fill_manual(values = umapColor2)+ 
+  scale_y_continuous(expand = c(0,0),name="", 
+                     label=c("0%","25%","50%","75%","100%"))+
+  scale_x_discrete(expand = c(0,0),name="")+ 
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(), 
+        axis.line = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text = element_text(color="black",size=10),
+        axis.ticks.length.x = unit(0.1,"cm"),
+        plot.margin = margin(10, 10, 10, 10)) 
 
+ggsave(p,file="Figure5k.pdf",width=6,height = 4)
 
+cols=c('#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026')
+vln.df<-read.csv("Figure5g.csv",header=T,row.names=1,check.names=F)
+vln.df$group=paste0("S",vln.df$group)
+ p<-vln.df%>%ggplot(aes(group,exp))+geom_violin(aes(fill=mean),scale = "width",linewidth=0)+geom_boxplot(width=0.3,outlier.shape = NA,color="white")+
+  # facet_wrap(vln.df$gene~.,scales = "free_y",nrow=10)+
+   #  labs(title = paste0(genes," expression"))+
+   scale_fill_gradientn(colors =cols)+
+   #scale_fill_viridis_c(option = "B",
+   scale_x_discrete("")+
+   theme_bw()+theme(
+     
+     panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+     axis.text.x.bottom = element_text(angle = 0,hjust = 1,vjust = 1,size=8)
+   )+theme(strip.text.y = element_text(angle = 0)) +  theme(
+     strip.text = element_text(face = "bold", size = rel(0.5)),
+     strip.background = element_rect(fill = "white", colour = "black", size = 1),strip.placement = "outside")+
+   force_panelsizes(rows = unit(1.2, "in"),cols = unit(4, "in"))
+ 
+ 
 
 
 
