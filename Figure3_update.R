@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
 script_path <- sub("^--file=", "", grep("^--file=", commandArgs(FALSE), value = TRUE))
 script_dir <- if (length(script_path) == 0) getwd() else dirname(normalizePath(script_path))
 project_dir <- normalizePath(file.path(script_dir, ".."))
-data_dir <- file.path(project_dir, "Figure_dat_for_public", "Figure3")
+data_dir <- file.path(project_dir, "Figure_dat", "Figure3")
 output_dir <- file.path(data_dir, "Figure3_output")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
