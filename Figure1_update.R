@@ -3,7 +3,7 @@ library(ggpubr)
 library(dplyr)
 library(scales)
 
-source_data_dir <- if (dir.exists("../Figure_dat_for_public/Figure1")) {
+source_data_dir <- if (dir.exists("../Figure1")) {
   "../Figure_dat_for_public/Figure1"
 } else if (dir.exists("Figure1")) {
   "Figure1"
