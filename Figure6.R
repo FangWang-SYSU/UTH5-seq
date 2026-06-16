@@ -38,7 +38,7 @@ for(ms in modules){
 
 # Heatmap of module enrichment 
 
-moduleEnrich<-read.csv("Module_cluster_odds_ratio.csv",
+moduleEnrich<-read.csv("Figure6b.csv",
                        header = T,
                        row.names = 1,
                        check.names = F)
@@ -57,7 +57,7 @@ pheatmap::pheatmap(moduleEnrich,
                    )
 
 ## Top10 perturbation bubble plot 
-plotdat<-read.csv("Top_10_cluster_prop_and ration_in pertub_module_fisher_plot_buble.csv",
+plotdat<-read.csv("Figure6c.csv",
                   header = T,
                   row.names = 1,
                   check.names = F)
@@ -86,7 +86,7 @@ ggsave(pp,file="top10_perturbation_plot_buble.pdf",width = 6,height = 17)
 
 
 ### ACTG2 and MEGF8 function
-enrichDat<-read.table("cluster_0_ACTG2_MFGE8.txt",header = T,check.names = F,sep="\t")
+enrichDat<-read.table("Figure6e",header = T,check.names = F,sep="\t")
 
 enrichDat$Description=factor(enrichDat$Description,levels = unique(enrichDat$Description))
 p=ggscatter(enrichDat,
@@ -97,12 +97,12 @@ p=ggscatter(enrichDat,
             legend="right",
             palette = c("#45174E","#D86B33"))+
   rotate_x_text(45)
-ggsave(p,file="Fig5d")
+ggsave(p,file="Fig6e")
 
 
-plotdat<-read.csv("MFGE8_compare_up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
+plotdat<-read.csv("Figure6f_scoure_data.csv",header = T,row.names = 1,check.names = F)
 
-pdf("Fig5e.pdf",width =8, height =8)
+pdf("Fig6f.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
            axistype = 1,
@@ -131,7 +131,7 @@ legend(x = "bottomright",
 dev.off()
 
 
-plotdat<-read.csv("MFGE8_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
+plotdat<-read.csv("Figure6g_scoure_data.csv",header = T,row.names = 1,check.names = F)
 pdf("Fig5f.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
@@ -160,8 +160,8 @@ legend(x = "bottomright",
 
 dev.off()
 
-plotdat<-read.csv("EPB41L1_compare_Up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
-pdf("Fig5g.pdf",width =8, height =8)
+plotdat<-read.csv("Figure6h_scoure_data.csv",header = T,row.names = 1,check.names = F)
+pdf("Fig6h.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
            axistype = 1,
@@ -189,8 +189,8 @@ legend(x = "bottomright",
 
 dev.off()
 
-plotdat<-read.csv("EPB41L1_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
-pdf("Fig5h.pdf",width =8, height =8)
+plotdat<-read.csv("Figure6i_scoure_data.csv",header = T,row.names = 1,check.names = F)
+pdf("Fig6i.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
            axistype = 1,
@@ -219,8 +219,8 @@ legend(x = "bottomright",
 dev.off()
 
 
-plotdat<-read.csv("GPR1_compare_Up_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
-pdf("Fig5i.pdf",width =8, height =8)
+plotdat<-read.csv("Figure6j_scoure_data.csv",header = T,row.names = 1,check.names = F)
+pdf("Fig6j.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
            axistype = 1,
@@ -252,8 +252,8 @@ dev.off()
 
 
 
-plotdat<-read.csv("GPR1_compare_Down_GOBP_plot_compare.csv",header = T,row.names = 1,check.names = F)
-pdf("Fig5j.pdf",width =8, height =8)
+plotdat<-read.csv("Figure6k_scoure_data.csv",header = T,row.names = 1,check.names = F)
+pdf("Fig6k.pdf",width =8, height =8)
 radarchart(plotdat,
            pty = c(16,16,32),
            axistype = 1,
