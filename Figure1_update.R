@@ -2,20 +2,43 @@ library(ggplot2)
 library(ggpubr)
 library(dplyr)
 library(scales)
+library(readxl)
 
-source_data_dir <- if (dir.exists("../Figure1")) {
-  "../Figure_dat_for_public/Figure1"
-} else if (dir.exists("Figure1")) {
-  "Figure1"
-} else {
-  "."
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
+
+source_data_file <- "../source_data/Figure_1_Source_Data.xlsx"
+if (!file.exists(source_data_file)) {
+  stop("Cannot find source data file: ", source_data_file)
 }
 
-output_dir <- file.path(source_data_dir, "Figure1_output")
+output_dir <- "Figure1_output"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
-read_source_data <- function(file_name) {
-  read.csv(file.path(source_data_dir, file_name), header = TRUE, check.names = FALSE)
+read_source_data <- function(sheet_name) {
+  read_excel(source_data_file, sheet = sheet_name) %>%
+    as.data.frame(check.names = FALSE)
+}
+
+standardize_scatter_data <- function(data) {
+  data %>%
+    mutate(
+      human_umi = as.numeric(human_umi),
+      mouse_umi = as.numeric(mouse_umi),
+      total_umi = as.numeric(total_umi),
+      human_umi_thousands = human_umi / 1000,
+      mouse_umi_thousands = mouse_umi / 1000
+    )
+}
+
+standardize_pie_data <- function(data, condition_label) {
+  names(data) <- tolower(names(data))
+
+  data %>%
+    mutate(
+      condition = condition_label,
+      proportion = as.numeric(proportion),
+      cell_count = proportion
+    )
 }
 
 umi_colors <- c("#ccece6", "#238b45", "#006d2c", "#00441b")
@@ -86,8 +109,10 @@ plot_index_assignment_pie_pair <- function(pie_data, title_1, title_2) {
   )
 }
 
-figure1b1_data <- read_source_data("Figure1b1_source_data.csv")
-figure1b2_data <- read_source_data("Figure1b2_source_data.csv") %>%
+figure1b1_data <- read_source_data("Fig1b_left_scatter") %>%
+  standardize_scatter_data()
+figure1b2_data <- read_source_data("Fig1b_right_scatter") %>%
+  standardize_scatter_data() %>%
   filter(total_umi > 1000)
 figure1b_scatter <- plot_genome_umi_scatter_pair(
   figure1b1_data,
@@ -102,7 +127,10 @@ ggsave(
   height = 4
 )
 
-figure1b_pie_data <- read_source_data("Figure1b_pie_source_data.csv")
+figure1b_pie_data <- bind_rows(
+  standardize_pie_data(read_source_data("Fig1b_left_pie"), "Figure1b1"),
+  standardize_pie_data(read_source_data("Fig1b_right_pie"), "Figure1b2")
+)
 figure1b_pie <- plot_index_assignment_pie_pair(
   figure1b_pie_data,
   title_1 = "Figure1b1",
@@ -115,8 +143,10 @@ ggsave(
   height = 3.5
 )
 
-figure1c1_data <- read_source_data("Figure1c1_source_data.csv")
-figure1c2_data <- read_source_data("Figure1c2_source_data.csv")
+figure1c1_data <- read_source_data("Fig1c_left_scatter") %>%
+  standardize_scatter_data()
+figure1c2_data <- read_source_data("Fig1c_right_scatter") %>%
+  standardize_scatter_data()
 figure1c_scatter <- plot_genome_umi_scatter_pair(
   figure1c1_data,
   figure1c2_data,
@@ -130,7 +160,10 @@ ggsave(
   height = 4
 )
 
-figure1c_pie_data <- read_source_data("Figure1c_pie_source_data.csv")
+figure1c_pie_data <- bind_rows(
+  standardize_pie_data(read_source_data("Fig1c_left_pie"), "Figure1c1"),
+  standardize_pie_data(read_source_data("Fig1c_right_pie"), "Figure1c2")
+)
 figure1c_pie <- plot_index_assignment_pie_pair(
   figure1c_pie_data,
   title_1 = "Figure1c1",
@@ -145,7 +178,12 @@ ggsave(
 
 
 
-figure1d_data <- read_source_data("Figure1d_source_data.csv")
+figure1d_data <- full_join(
+  read_source_data("Fig1d"),
+  read_source_data("Fig1e"),
+  by = c("cell_id", "cells_per_droplet")
+) %>%
+  mutate(cells_per_droplet = as.factor(cells_per_droplet))
 figure1d_genes <- ggboxplot(
   figure1d_data,
   x = "cells_per_droplet",
@@ -184,7 +222,8 @@ ggsave(
   height = 3.5
 )
 
-figure1f_data <- read_source_data("Figure1f_source_data.csv") %>%
+figure1f_data <- read_source_data("Fig1f") %>%
+  rename(experiment = Experiment) %>%
   mutate(cell_count_100k = cell_count / 100000)
 figure1f_sgrna_capture <- ggscatter(
   figure1f_data,
@@ -208,7 +247,7 @@ ggsave(
   height = 4
 )
 
-figure1g_data <- read_source_data("Figure1g_source_data.csv")
+figure1g_data <- read_source_data("Fig1g")
 figure1g_cell_counts <- gghistogram(
   figure1g_data,
   x = "cell_count",
@@ -230,4 +269,22 @@ ggsave(
   figure1g_cell_counts,
   width = 3.5,
   height = 3
+)
+
+figure1_all_panels <- ggarrange(
+  figure1b_scatter,
+  figure1b_pie,
+  figure1c_scatter,
+  figure1c_pie,
+  figure1d_boxplots,
+  figure1f_sgrna_capture,
+  figure1g_cell_counts,
+  ncol = 1,
+  heights = c(1.1, 1, 1.1, 1, 1, 1, 0.9)
+)
+ggsave(
+  "Figure1_updated_all_panels.pdf",
+  figure1_all_panels,
+  width = 10,
+  height = 22
 )
