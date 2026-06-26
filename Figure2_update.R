@@ -4,22 +4,23 @@ library(ggpubr)
 library(ComplexHeatmap)
 library(circlize)
 library(dplyr)
+library(readxl)
+library(grid)
 
 ht_opt$message <- FALSE
 
-source_data_dir <- if (dir.exists("../Figure2")) {
-  "../Figure_dat_for_public/Figure2"
-} else if (dir.exists("Figure2")) {
-  "Figure2"
-} else {
-  "."
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
+
+source_data_file <- "../source_data/Figure_2_Source_Data.xlsx"
+if (!file.exists(source_data_file)) {
+  stop("Cannot find source data file: ", source_data_file)
 }
 
-output_dir <- file.path(source_data_dir, "Figure2_output")
+output_dir <- "Figure2_output"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
-read_source_data <- function(file_name, ...) {
-  fread(file.path(source_data_dir, file_name), check.names = FALSE, ...)
+read_source_data <- function(sheet_name, ...) {
+  as.data.table(read_excel(source_data_file, sheet = sheet_name, ...))
 }
 
 highlight_perturbations <- c(
@@ -60,11 +61,17 @@ program_colors <- c(
   Program9 = "#B19D86"
 )
 
-effect_size_data <- read_source_data("Figure2b_source_data.csv")
-gene_program_data <- read_source_data("Figure2c_source_data.csv")
-perturbation_module_data <- read_source_data("Figure2f_source_data.csv")
+effect_size_data <- read_source_data("Fig2b")
+gene_program_data <- read_source_data("Fig2c") %>%
+  mutate(
+    umap_1 = as.numeric(umap_1),
+    umap_2 = as.numeric(umap_2)
+  ) %>%
+  as.data.table()
+perturbation_module_data <- read_source_data("Fig2f")
 
 effect_matrix <- as.matrix(effect_size_data[, -"perturbation"])
+storage.mode(effect_matrix) <- "numeric"
 rownames(effect_matrix) <- effect_size_data$perturbation
 effect_matrix_raw <- effect_matrix
 
@@ -106,11 +113,13 @@ column_annotation <- HeatmapAnnotation(
   col = list(Program = program_colors)
 )
 
-heatmap_colors <- colorRamp2(c(-0.2, 0, 0.2), c("#00768B", "white", "#C36600"))
+heatmap_colors <- colorRamp2(
+  c(-0.2, -0.05, 0, 0.05, 0.2),
+  c("#00768B", "#79B8C6", "white", "#E7A15A", "#C36600")
+)
 effect_matrix[effect_matrix > 0.2] <- 0.2
 effect_matrix[effect_matrix < -0.2] <- -0.2
 
-pdf(file.path(output_dir, "Figure2b_effect_size_heatmap.pdf"), width = 25, height = 20)
 effect_heatmap <- ComplexHeatmap::Heatmap(
   effect_matrix,
   show_row_names = FALSE,
@@ -121,21 +130,34 @@ effect_heatmap <- ComplexHeatmap::Heatmap(
   cluster_row_slices = TRUE,
   cluster_rows = FALSE,
   col = heatmap_colors,
+  use_raster = TRUE,
+  raster_quality = 4,
+  raster_device = "png",
   row_split = perturbation_module_data$perturbation_module,
   column_split = gene_program_data$gene_program,
   top_annotation = column_annotation,
   right_annotation = row_annotation
 )
-draw(
-  effect_heatmap,
-  show_heatmap_legend = TRUE,
-  heatmap_legend_side = "left",
-  annotation_legend_side = "left",
-  legend_grouping = "original"
-)
+draw_effect_heatmap <- function() {
+  draw(
+    effect_heatmap,
+    show_heatmap_legend = TRUE,
+    heatmap_legend_side = "left",
+    annotation_legend_side = "left",
+    legend_grouping = "original"
+  )
+}
+
+pdf(file.path(output_dir, "Figure2b_effect_size_heatmap.pdf"), width = 25, height = 20)
+draw_effect_heatmap()
 dev.off()
 
-gene_correlation_histogram_data <- read_source_data("Figure2d_histogram_source_data.csv")
+gene_correlation_histogram_data <- read_source_data("Fig2d") %>%
+  mutate(
+    bin_midpoint = as.numeric(bin_midpoint),
+    bin_width = as.numeric(bin_width),
+    density = as.numeric(density)
+  )
 figure2d_correlation_histogram <- ggplot(
   gene_correlation_histogram_data,
   aes(x = bin_midpoint, y = density, fill = comparison_group, color = comparison_group)
@@ -152,7 +174,8 @@ ggsave(
   height = 3
 )
 
-effect_density_data <- read_source_data("Figure2e_source_data.csv")
+effect_density_data <- read_source_data("Fig2e") %>%
+  mutate(absolute_effect_size = as.numeric(absolute_effect_size))
 figure2e_effect_density <- ggdensity(
   effect_density_data,
   x = "absolute_effect_size",
@@ -228,3 +251,18 @@ ggsave(
   width = 6,
   height = 5
 )
+
+pdf("Figure2_updated_all_panels.pdf", width = 25, height = 20)
+draw_effect_heatmap()
+print(
+  ggarrange(
+    figure2c_gene_program_umap,
+    figure2d_correlation_histogram,
+    figure2e_effect_density,
+    figure2f_perturbation_module_umap,
+    ncol = 2,
+    nrow = 2,
+    labels = c("Fig2c", "Fig2d", "Fig2e", "Fig2f")
+  )
+)
+dev.off()
