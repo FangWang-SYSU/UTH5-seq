@@ -113,8 +113,8 @@ plot_lr_bipartite <- function(df,
                               node_size = 3.8,
                               left_title = "NTCs",
                               right_title = "Targeted cells") {
-  df$Rewiring_Index[df$Rewiring_Index < 0.2] <- 0
-  df$Rewiring_Index[df$Rewiring_Index > 0.7] <- 0.7
+  df$Rewiring_Index[df$Rewiring_Index < 0.2] <- 0.2
+  df$Rewiring_Index[df$Rewiring_Index > 0.6] <- 0.6
   df <- df %>% mutate(across(all_of(c(left, right)), as.character))
 
   edges <- df %>%
@@ -152,16 +152,16 @@ plot_lr_bipartite <- function(df,
       lineend = "round"
     ) +
     scale_edge_width(
-      range = c(0, 1.6),
+      range = c(0, 1.2),
       name = edge_width,
-      breaks = c(0.3, 0.5, 0.7)
+      breaks = c(0.2, 0.4, 0.6)
     ) +
     scale_edge_colour_gradient2(
       low = "#f1a340",
       mid = "#f7f7f7",
       high = "#6e016b",
-      midpoint = 0.35,
-      limits = c(0, 0.7),
+      midpoint = 0.4,
+      limits = c(0.2, 0.6),
       breaks = c(0.2, 0.4, 0.6),
       name = edge_color
     ) +
@@ -186,6 +186,8 @@ plot_lr_bipartite <- function(df,
     annotate("text", x = -0.05, y = 1.04, label = left_title, hjust = 1, size = 4.2) +
     annotate("text", x = 1.05, y = 1.04, label = right_title, hjust = 0, size = 4.2)
 }
+
+
 
 plot_network <- function(sheet_name, output_file) {
   df <- read_source_data(sheet_name) %>%
@@ -331,3 +333,7 @@ draw(h3d, heatmap_legend_side = "left", annotation_legend_side = "left", legend_
 print(ggarrange(p3e, p3f, ncol = 2, labels = c("Fig3e", "Fig3f")))
 print(ggarrange(plotlist = network_plots, ncol = 3, labels = names(network_plots)))
 dev.off()
+
+
+
+
