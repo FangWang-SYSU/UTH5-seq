@@ -379,6 +379,55 @@ pheatmap::pheatmap(tfc_6_7_postn_ko,
                    filename = file.path(output_dir, "Figure4e_POSTN_KO_TFc6_TFc7_heatmap.pdf")
 )
 
+## TFc6 correlation heatmap: upper triangle NTC, lower triangle POSTN KO
+tfc6_triangle_order <- rev(c6$RowName)
+tfc6_source_triangle <- NTC_TF_correlation[c6$RowName, c6$RowName]
+tfc6_ntc_triangle <- tfc6_source_triangle
+tfc6_ntc_triangle[lower.tri(tfc6_ntc_triangle)] <-
+  t(tfc6_source_triangle)[lower.tri(tfc6_source_triangle)]
+tfc6_postn_ko_triangle <- tfc6_source_triangle
+tfc6_postn_ko_triangle[upper.tri(tfc6_postn_ko_triangle)] <-
+  t(tfc6_source_triangle)[upper.tri(tfc6_source_triangle)]
+
+tfc6_ntc_triangle <- tfc6_ntc_triangle[tfc6_triangle_order, tfc6_triangle_order]
+tfc6_postn_ko_triangle <- tfc6_postn_ko_triangle[tfc6_triangle_order, tfc6_triangle_order]
+
+tfc6_ntc_triangle[tfc6_ntc_triangle > 0.6] <- 0.6
+tfc6_ntc_triangle[tfc6_ntc_triangle < (-0.6)] <- -0.6
+tfc6_postn_ko_triangle[tfc6_postn_ko_triangle > 0.6] <- 0.6
+tfc6_postn_ko_triangle[tfc6_postn_ko_triangle < (-0.6)] <- -0.6
+
+tfc6_ntc_postn_triangle <- tfc6_postn_ko_triangle
+tfc6_ntc_postn_triangle[upper.tri(tfc6_ntc_postn_triangle)] <-
+  tfc6_ntc_triangle[upper.tri(tfc6_ntc_triangle)]
+diag(tfc6_ntc_postn_triangle) <- NA
+
+tfc6_triangle_bk <- seq(-0.6, 0.6, by = 0.01)
+tfc6_triangle_col <- c(
+  colorRampPalette(c("#084594", "white"))(sum(tfc6_triangle_bk < -0.16)),
+  rep("white", sum(tfc6_triangle_bk >= -0.16 & tfc6_triangle_bk < 0.16)),
+  colorRampPalette(c("white", "#99000d"))(sum(tfc6_triangle_bk >= 0.16) - 1)
+)
+
+pheatmap::pheatmap(tfc6_ntc_postn_triangle,
+                   cluster_rows = F,
+                   cluster_cols = F,
+                   treeheight_row = 0,
+                   treeheight_col = 0,
+                   scale = 'none',
+                   color = tfc6_triangle_col,
+                   breaks = tfc6_triangle_bk,
+                   cellwidth = 14,
+                   cellheight = 14,
+                   fontsize = 12,
+                   border_color = '#ffffff',
+                   na_col = "white",
+                   filename = file.path(output_dir, "Figure4e_NTC_POSTN_KO_TFc6_triangle_heatmap.pdf")
+)
+
+
+
+
 
 
 
@@ -688,7 +737,3 @@ p4<-ggscatter(krtap3_1_ko,
               legend='right')+stat_cor()+ggtitle("ACTG2_KO")
 pp=ggarrange(p1,p2,p3, p4,ncol = 4, nrow = 1)
 ggsave(pp, file = file.path(output_dir, "Figure4n_o_RARB_TWIST2_KRTAP3-1_KO.pdf"))
-
-
-
-
