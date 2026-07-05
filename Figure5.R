@@ -241,3 +241,167 @@ p <- vln.df %>%
     strip.placement = "outside"
   )
 ggsave(p, file = file.path(output_dir, "Figure5g_score_violin.pdf"), width = 5, height = 3)
+
+## Figure 5h pathway bubble plot
+pathway_bubble <- read_source("Fig5h")
+pathway_bubble <- pathway_bubble %>%
+  mutate(
+    cluster = factor(as_cluster_id(cluster), levels = cluster_levels),
+    log2FC = as_numeric_column(log2FC),
+    log2FC_plot = pmin(pmax(log2FC, 0), 1.5),
+    zscore = as_numeric_column(zscore),
+    pathway_label = gsub("\\.+", " ", Pathways)
+  )
+
+pathway_levels <- rev(unique(pathway_bubble$pathway_label))
+pathway_bubble <- pathway_bubble %>%
+  mutate(
+    pathway_label = factor(pathway_label, levels = pathway_levels),
+    pathway_index = as.numeric(pathway_label),
+    cluster_index = as.numeric(cluster)
+  )
+
+cluster_anno <- data.frame(
+  cluster = factor(cluster_levels, levels = cluster_levels),
+  cluster_index = seq_along(cluster_levels),
+  group = c(rep("PRRX1+", 5), rep("ACTA2+", 5), rep("Others", 3)),
+  stringsAsFactors = FALSE
+)
+cluster_anno$group <- factor(cluster_anno$group, levels = c("PRRX1+", "ACTA2+", "Others"))
+cluster_anno_label <- cluster_anno %>%
+  group_by(group) %>%
+  summarise(cluster_index = mean(cluster_index), .groups = "drop")
+
+p <- ggplot(pathway_bubble, aes(x = cluster_index, y = pathway_index)) +
+  geom_tile(
+    data = cluster_anno,
+    aes(x = cluster_index, y = length(pathway_levels) + 1, fill = group),
+    inherit.aes = FALSE,
+    width = 0.9,
+    height = 0.55
+  ) +
+  geom_text(
+    data = cluster_anno_label,
+    aes(x = cluster_index, y = length(pathway_levels) + 1.75, label = group),
+    inherit.aes = FALSE,
+    size = 3.5,
+    fontface = "bold"
+  ) +
+  geom_point(aes(size = log2FC_plot, color = zscore), alpha = 0.95) +
+  scale_fill_manual(values = c("PRRX1+" = "#C87983", "ACTA2+" = "#79AEB2", "Others" = "#D9A344"),
+                    guide = "none") +
+  scale_color_gradient2(
+    low = "#2C5AA0",
+    mid = "white",
+    high = "#C43C7D",
+    midpoint = 0,
+    limits = c(-2, 2),
+    oob = squish,
+    name = "Z-score"
+  ) +
+  scale_size_continuous(range = c(0.35, 4.2), limits = c(0, 1.5), name = "log2FC") +
+  scale_x_continuous(
+    breaks = seq_along(cluster_levels),
+    labels = cluster_levels,
+    expand = expansion(mult = c(0.01, 0.01))
+  ) +
+  scale_y_continuous(
+    breaks = seq_along(pathway_levels),
+    labels = pathway_levels,
+    position = "right",
+    expand = expansion(add = c(0.5, 2.1))
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_classic(base_size = 8) +
+  theme(
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, color = "black"),
+    axis.text.y = element_text(color = "black"),
+    axis.ticks = element_line(linewidth = 0.25),
+    legend.position = "right",
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    plot.margin = margin(12, 8, 8, 8)
+  )
+ggsave(p, file = file.path(output_dir, "Figure5h_metabolism_bubble.pdf"),
+       width = 7.2, height = 9.2, useDingbats = FALSE)
+
+## Figure 5j NTC and perturbed CAF correlation triangle heatmap
+corr_mat <- read_source("Fig5j")
+rownames(corr_mat) <- corr_mat$Clusters
+corr_mat$Clusters <- NULL
+corr_mat[] <- lapply(corr_mat, as_numeric_column)
+
+ntc_order <- paste0("NTC_", cluster_levels)
+ko_order <- paste0("KO_", cluster_levels)
+corr_mat <- as.matrix(corr_mat[ntc_order, ko_order])
+
+triangle_df <- as.data.frame(as.table(corr_mat), stringsAsFactors = FALSE)
+colnames(triangle_df) <- c("NTC", "KO", "Correlation")
+triangle_df <- triangle_df %>%
+  mutate(
+    NTC_cluster = sub("^NTC_", "", NTC),
+    KO_cluster = sub("^KO_", "", KO),
+    row_index = match(NTC_cluster, cluster_levels),
+    col_index = match(KO_cluster, cluster_levels)
+  ) %>%
+  filter(row_index >= col_index) %>%
+  mutate(
+    x = row_index + col_index,
+    y = row_index - col_index,
+    cell_id = row_number()
+  )
+
+triangle_poly <- triangle_df %>%
+  slice(rep(row_number(), each = 4)) %>%
+  group_by(cell_id) %>%
+  mutate(
+    corner = row_number(),
+    x_poly = x + c(0, 0.9, 0, -0.9),
+    y_poly = y + c(0.9, 0, -0.9, 0)
+  ) %>%
+  ungroup()
+
+bottom_labels <- data.frame(
+  label = cluster_levels,
+  x = 2 * seq_along(cluster_levels),
+  y = -0.9
+)
+left_labels <- data.frame(
+  label = cluster_levels,
+  x = seq_along(cluster_levels) + 1,
+  y = seq_along(cluster_levels) - 1
+)
+right_labels <- data.frame(
+  label = cluster_levels,
+  x = length(cluster_levels) + seq_along(cluster_levels),
+  y = length(cluster_levels) - seq_along(cluster_levels)
+)
+
+p <- ggplot(triangle_poly, aes(x = x_poly, y = y_poly, group = cell_id, fill = Correlation)) +
+  geom_polygon(color = NA, linewidth = 0) +
+  
+  geom_text(data = left_labels, aes(x = x - 0.65, y = y, label = label),
+            inherit.aes = FALSE, angle = 45, size = 3, hjust = 1) +
+  geom_text(data = right_labels, aes(x = x + 0.65, y = y, label = label),
+            inherit.aes = FALSE, angle = -45, size = 3, hjust = 0) +
+  annotate("text", x = 2.2, y = length(cluster_levels) - 1.5, label = "NTCs",
+           angle = 45, size = 3.4, fontface = "bold") +
+  annotate("text", x = 2 * length(cluster_levels) - 2.2, y = length(cluster_levels) - 1.5,
+           label = "Perturbed CAFs", angle = -45, size = 3.4, fontface = "bold") +
+  scale_fill_gradientn(
+    colors = c("#4FA66A", "#F7F7F2", "#F2A13A"),
+    limits = c(0.5, 0.9),
+    oob = squish,
+    name = "Correlation"
+  ) +
+  coord_fixed(clip = "off") +
+  theme_void(base_size = 9) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    plot.margin = margin(12, 20, 8, 20)
+  )
+ggsave(p, file = file.path(output_dir, "Figure5j_NTC_KO_triangle_heatmap.pdf"),
+       width = 4.6, height = 4.0, useDingbats = FALSE)
